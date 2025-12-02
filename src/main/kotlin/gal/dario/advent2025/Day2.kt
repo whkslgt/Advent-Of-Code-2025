@@ -27,17 +27,10 @@ class Day2() {
         return false
     }
 
-    private fun sumInvalidIdsInRange(start: Long, end: Long): Long {
-        var sum = 0L
-
-        for (num in start..end) {
-            if (isInvalidId(num.toString())) {
-                sum += num
-            }
-        }
-
-        return sum
-    }
+    private fun sumInvalidIdsInRange(start: Long, end: Long) =
+        (start..end)
+            .filter { num -> isInvalidId(num.toString()) }
+            .sumOf { it }
 
     fun calculateBadIDsSum(): Long {
         return readInput().sumOf { range ->
