@@ -13,29 +13,22 @@ class Day3 {
     }
 
     private fun calculateBankJoltage(line: String): Long {
-        val lineChars = line.toCharArray()
-        val resultArray = charArrayOf(lineChars[0], lineChars[1])
+        val toRemove = line.length - 12
+        var removed = 0
 
-        for(index in 1 until lineChars.lastIndex) {
-            if(lineChars[index] > resultArray[0]) {
-                resultArray[0] = lineChars[index]
-                resultArray[1] = lineChars[index + 1]
+        return line.fold(mutableListOf<Char>()) { result, char ->
+            while (result.isNotEmpty() && result.last() < char && removed < toRemove) {
+                result.removeLast()
+                removed++
             }
-            else if(lineChars[index] > resultArray[1]) resultArray[1] = lineChars[index]
-        }
-
-        if(lineChars.last() > resultArray[1]) resultArray[1] = lineChars.last()
-
-//        println("Line: $line, biggestFirstNumber: $biggestFirstNumber, biggestSecondNumber: $biggestSecondNumber")
-        val maxJoltage = String(resultArray)
-//        println("Max joltage: $maxJoltage")
-
-        return maxJoltage.toLong()
+            result.add(char)
+            result
+        }.take(12).joinToString("").toLong()
     }
 
     fun calculateTotalJoltages(): Long {
         var totalJoltages = 0L
-        readInput().forEach { line -> totalJoltages += calculateBankJoltage(line)}
+        readInput().forEach { line -> totalJoltages += calculateBankJoltage(line) }
         return totalJoltages
     }
 }
