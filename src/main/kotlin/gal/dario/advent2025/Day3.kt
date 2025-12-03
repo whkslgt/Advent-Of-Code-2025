@@ -5,30 +5,60 @@ class Day3 {
         const val INPUT_FILE = "/day-3-input.txt"
     }
 
-    private fun readInput(): Sequence<String> {
+    private fun readInput(): ByteArray {
         return object {}.javaClass
             .getResourceAsStream(INPUT_FILE)!!
-            .bufferedReader()
-            .lineSequence()
+            .readBytes()
     }
 
-    private fun calculateBankJoltage(line: String): Long {
-        val toRemove = line.length - 12
+    private fun calculateBankJoltage(input: ByteArray, start: Int, end: Int, stack: ByteArray): Long {
+        val length = end - start
+        val toRemove = length - 12
         var removed = 0
+        var stackSize = 0
 
-        return line.fold(mutableListOf<Char>()) { result, char ->
-            while (result.isNotEmpty() && result.last() < char && removed < toRemove) {
-                result.removeLast()
+        var i = start
+        while (i < end) {
+            val byte = input[i]
+            while (stackSize > 0 && stack[stackSize - 1] < byte && removed < toRemove) {
+                stackSize--
                 removed++
             }
-            result.add(char)
-            result
-        }.take(12).joinToString("").toLong()
+            stack[stackSize++] = byte
+            i++
+        }
+
+        var result = 0L
+        i = 0
+        while (i < 12) {
+            result = result * 10 + (stack[i] - 48)
+            i++
+        }
+        return result
     }
 
     fun calculateTotalJoltages(): Long {
+        val input = readInput()
+        val stack = ByteArray(128)
         var totalJoltages = 0L
-        readInput().forEach { line -> totalJoltages += calculateBankJoltage(line) }
+        var lineStart = 0
+
+        var i = 0
+        val newline = '\n'.code.toByte()
+        while (i < input.size) {
+            if (input[i] == newline) {
+                if (i > lineStart) {
+                    totalJoltages += calculateBankJoltage(input, lineStart, i, stack)
+                }
+                lineStart = i + 1
+            }
+            i++
+        }
+
+        if (lineStart < input.size) {
+            totalJoltages += calculateBankJoltage(input, lineStart, input.size, stack)
+        }
+
         return totalJoltages
     }
 }
