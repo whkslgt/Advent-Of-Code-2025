@@ -18,7 +18,7 @@ open class Day3Benchmark {
         day3 = Day3()
     }
 
-    @Benchmark
+//    @Benchmark
     fun benchmarkCalculateTotalJoltages(): Long {
         return day3.calculateTotalJoltages()
     }

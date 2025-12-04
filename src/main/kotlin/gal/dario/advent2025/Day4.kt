@@ -14,7 +14,7 @@ class Day4 {
     }
 
     private data class Coordinate(val row: Int, val col: Int)
-    private data class Cell(val hasRoll: Boolean, var visited: Boolean = false)
+    private data class Cell(var hasRoll: Boolean)
 
     fun calculateAccessibleRolls(): Int {
         val matrix = mutableMapOf<Coordinate, Cell>()
@@ -29,23 +29,28 @@ class Day4 {
             }
         }
 
-        var accessibleCount = 0
-        for (row in 0..maxRow) {
-            for (col in 0..maxCol) {
-                val coord = Coordinate(row, col)
-                val currentCell = matrix[coord]
-                if (!currentCell!!.visited && isAccessible(matrix, currentCell, coord)) {
-                    accessibleCount++
+        var iterationCount = 0
+        var totalCount = 0
+        do {
+            iterationCount = 0
+            for (row in 0..maxRow) {
+                for (col in 0..maxCol) {
+                    val coord = Coordinate(row, col)
+                    val currentCell = matrix[coord]
+                    if (currentCell!!.hasRoll && isAccessible(matrix, currentCell, coord)) {
+                        currentCell.hasRoll = false
+                        iterationCount++
+                    }
                 }
             }
-        }
+            totalCount += iterationCount
+        } while (iterationCount > 0)
 
-        return accessibleCount
+        return totalCount
     }
 
     private fun isAccessible(matrix: Map<Coordinate, Cell>, currentCell: Cell, coord: Coordinate): Boolean {
         if (!currentCell.hasRoll) return false
-        currentCell.visited = true
 
         val neighbors = listOfNotNull(
             coord.copy(row = coord.row - 1),
