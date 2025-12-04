@@ -14,59 +14,40 @@ class Day4 {
     }
 
     private data class Coordinate(val row: Int, val col: Int)
-    private data class Cell(var hasRoll: Boolean)
 
     fun calculateAccessibleRolls(): Int {
-        val matrix = mutableMapOf<Coordinate, Cell>()
-        var maxRow = 0
-        var maxCol = 0
+        val rolls = parseMatrix().toMutableSet()
+        var total = 0
 
-        readInput().forEachIndexed { row, line ->
-            maxRow = maxOf(maxRow, row)
-            line.forEachIndexed { col, char ->
-                maxCol = maxOf(maxCol, col)
-                matrix[Coordinate(row, col)] = Cell(char == '@')
+        while (rolls.isNotEmpty()) {
+            val toRemove = rolls.filter { coord ->
+                val row = coord.row
+                val col = coord.col
+                var count = 0
+                for (diffRow in -1..1) {
+                    for (diffCol in -1..1) {
+                        if ((diffRow or diffCol) != 0 && Coordinate(row + diffRow, col + diffCol) in rolls) {
+                            if (++count >= 4) break
+                        }
+                    }
+                    if (count >= 4) break
+                }
+                count < 4
             }
+            if (toRemove.isEmpty()) break
+            rolls.removeAll(toRemove)
+            total += toRemove.size
         }
 
-        var iterationCount = 0
-        var totalCount = 0
-        do {
-            iterationCount = 0
-            for (row in 0..maxRow) {
-                for (col in 0..maxCol) {
-                    val coord = Coordinate(row, col)
-                    val currentCell = matrix[coord]
-                    if (currentCell!!.hasRoll && isAccessible(matrix, currentCell, coord)) {
-                        currentCell.hasRoll = false
-                        iterationCount++
-                    }
-                }
+        return total
+    }
+
+    private fun parseMatrix(): Set<Coordinate> =
+        readInput().flatMapIndexed { row, line ->
+            line.mapIndexedNotNull { col, char ->
+                Coordinate(row, col).takeIf { char == '@' }
             }
-            totalCount += iterationCount
-        } while (iterationCount > 0)
-
-        return totalCount
-    }
-
-    private fun isAccessible(matrix: Map<Coordinate, Cell>, currentCell: Cell, coord: Coordinate): Boolean {
-        if (!currentCell.hasRoll) return false
-
-        val neighbors = listOfNotNull(
-            coord.copy(row = coord.row - 1),
-            coord.copy(row = coord.row - 1, col = coord.col + 1),
-            coord.copy(row = coord.row - 1, col = coord.col - 1),
-            coord.copy(row = coord.row + 1),
-            coord.copy(row = coord.row + 1, col = coord.col + 1),
-            coord.copy(row = coord.row + 1, col = coord.col - 1),
-            coord.copy(col = coord.col - 1),
-            coord.copy(col = coord.col + 1)
-        )
-
-        return neighbors.filter { neighbor ->
-            matrix[neighbor]?.hasRoll ?: false
-        }.size < 4
-    }
+        }.toSet()
 }
 
 fun main() {
