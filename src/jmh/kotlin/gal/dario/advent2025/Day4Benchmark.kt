@@ -18,7 +18,7 @@ open class Day4Benchmark {
         day4 = Day4()
     }
 
-    @Benchmark
+//    @Benchmark
     fun benchmarkCalculateAccessibleRolls(): Int {
         return day4.calculateAccessibleRolls()
     }

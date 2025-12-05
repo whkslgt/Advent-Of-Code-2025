@@ -56,8 +56,16 @@ class Day5 {
         mergedRanges.add(currentRange)
         return mergedRanges
     }
+
+    fun calculatePossibleFreshIngredients(): Long {
+        val input = readInput().iterator()
+        val mergedRanges = ranges(input)
+
+        return mergedRanges.fold(0L) { acc, range -> acc + (range.last - range.first + 1) }
+    }
 }
 
 fun main() {
     println("Fresh ingredients: ${Day5().calculateFreshIngredients()}")
+    println("Possible fresh ingredients: ${Day5().calculatePossibleFreshIngredients()}")
 }
