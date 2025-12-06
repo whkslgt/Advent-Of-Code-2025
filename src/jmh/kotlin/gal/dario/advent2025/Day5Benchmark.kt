@@ -18,12 +18,12 @@ open class Day5Benchmark {
         day5 = Day5()
     }
 
-    @Benchmark
+//    @Benchmark
     fun benchmarkCalculatePossibleFreshIngredients(): Long {
         return day5.calculatePossibleFreshIngredients()
     }
 
-    @Benchmark
+//    @Benchmark
     fun benchmarkCalculateFreshIngredients(): Int {
         return day5.calculateFreshIngredients()
     }
