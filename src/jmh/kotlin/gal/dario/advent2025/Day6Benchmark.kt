@@ -18,12 +18,12 @@ open class Day6Benchmark {
         day6 = Day6()
     }
 
-    @Benchmark
+//    @Benchmark
     fun benchmarkCalculateTotalProblemSolutionsSum(): Long {
         return day6.calculateTotalProblemSolutionsSum()
     }
 
-    @Benchmark
+//    @Benchmark
     fun benchmarkCalculateTotalCephalopodSolutionsSum(): Long {
         return day6.calculateTotalCephalopodSolutionsSum()
     }
