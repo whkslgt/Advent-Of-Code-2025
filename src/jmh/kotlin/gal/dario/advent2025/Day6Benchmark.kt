@@ -22,4 +22,9 @@ open class Day6Benchmark {
     fun benchmarkCalculateTotalProblemSolutionsSum(): Long {
         return day6.calculateTotalProblemSolutionsSum()
     }
+
+    @Benchmark
+    fun benchmarkCalculateTotalCephalopodSolutionsSum(): Long {
+        return day6.calculateTotalCephalopodSolutionsSum()
+    }
 }
