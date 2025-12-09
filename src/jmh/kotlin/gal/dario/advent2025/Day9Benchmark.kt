@@ -10,22 +10,22 @@ import java.util.concurrent.TimeUnit
 @Warmup(iterations = 3, time = 1)
 @Measurement(iterations = 5, time = 1)
 @Fork(2)
-open class Day8Benchmark {
+open class Day9Benchmark {
 
-    private lateinit var day8: Day8
+    private lateinit var day9: Day9
 
     @Setup
     fun setup() {
-        day8 = Day8()
+        day9 = Day9()
     }
 
-//    @Benchmark
+    @Benchmark
     fun benchmarkPart1(): Long {
-        return day8.part1()
+        return day9.part1()
     }
 
-//    @Benchmark
+    @Benchmark
     fun benchmarkPart2(): Long {
-        return day8.part2()
+        return day9.part2()
     }
 }
