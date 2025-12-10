@@ -10,6 +10,11 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    implementation("com.google.ortools:ortools-java:9.14.6206")
+    runtimeOnly("com.google.ortools:ortools-darwin-aarch64:9.14.6206")
+}
+
 kotlin {
     jvmToolchain(21)
 }
