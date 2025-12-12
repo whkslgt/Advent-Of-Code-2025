@@ -24,6 +24,40 @@ class Day11 {
         }
     }
 
+    private val memo = mutableMapOf<Triple<String, Boolean, Boolean>, Long>()
+
+    fun part2(): Long {
+        memo.clear()
+        val first = inputMap["svr"]!!
+        return first.distinct().sumOf { svr ->
+            val visitedDac = svr == "dac"
+            val visitedFft = svr == "fft"
+            countPathsFromSvrToOut(svr, visitedDac, visitedFft)
+        }
+    }
+
+    private fun countPathsFromSvrToOut(current: String, visitedDac: Boolean, visitedFft: Boolean): Long {
+        if (current == "out") {
+            return if (visitedDac && visitedFft) 1L else 0L
+        }
+
+        val state = Triple(current, visitedDac, visitedFft)
+        if (memo.containsKey(state)) {
+            return memo[state]!!
+        }
+
+        val count = inputMap[current]!!.distinct().sumOf { next ->
+            countPathsFromSvrToOut(
+                next,
+                visitedDac || next == "dac",
+                visitedFft || next == "fft"
+            )
+        } ?: 0
+
+        memo[state] = count
+        return count
+    }
+
     private fun countPathsToOut(current: String): Int {
         if (current == "out") return 1
 
@@ -35,4 +69,5 @@ class Day11 {
 
 fun main() {
     Day11().part1().also(::println)
+    Day11().part2().also(::println)
 }
