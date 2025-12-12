@@ -3,15 +3,24 @@ package gal.dario.advent2025
 class Day12 {
     companion object {
         const val INPUT_FILE = "/day-12-input.txt"
-        const val MAX_SEARCH_STEPS = 1_000_000
         private val SHAPE_HEADER_PATTERN = Regex("\\d+:")
     }
 
     data class Shape(val cells: List<Pair<Int, Int>>, val width: Int, val height: Int)
     data class Region(val width: Int, val height: Int, val presentCounts: List<Int>)
-    data class Placement(val rowMasks: Map<Int, Long>)
+    data class Placement(val rowMasks: Map<Int, Long>) {
+        fun conflictsWith(board: LongArray): Boolean {
+            return rowMasks.any { (row, mask) -> (board[row] and mask) != 0L }
+        }
 
-    private var searchSteps = 0
+        fun place(board: LongArray) {
+            rowMasks.forEach { (row, mask) -> board[row] = board[row] or mask }
+        }
+
+        fun unplace(board: LongArray) {
+            rowMasks.forEach { (row, mask) -> board[row] = board[row] xor mask }
+        }
+    }
 
     private fun readInput(): List<String> {
         return object {}.javaClass.getResourceAsStream(INPUT_FILE)!!.bufferedReader().readLines()
@@ -136,35 +145,53 @@ class Day12 {
         if (neededArea > boardArea) return false
 
         val placements = shapes.map { generatePlacementsForShape(it, region) }
-
-        searchSteps = 0
-        return solve(LongArray(region.height), counts.toMutableList(), placements)
+        return solve(LongArray(region.height), counts.toIntArray(), placements, 0)
     }
 
-    private fun solve(board: LongArray, remaining: MutableList<Int>, placements: List<List<Placement>>): Boolean {
-        if (++searchSteps > MAX_SEARCH_STEPS) return false
-        if (remaining.all { it == 0 }) return true
+    private fun solve(
+        board: LongArray,
+        remaining: IntArray,
+        placements: List<List<Placement>>,
+        shapeIdx: Int
+    ): Boolean {
+        val nextShapeIdx = (shapeIdx until remaining.size).firstOrNull { remaining[it] > 0 }
+            ?: return true
 
-        val shapeIdx = remaining.indexOfFirst { it > 0 }
-        if (shapeIdx == -1) return true
+        return placeShapeInstances(board, remaining, placements, nextShapeIdx, 0)
+    }
 
-        for (placement in placements[shapeIdx]) {
-            if (placement.rowMasks.all { (row, mask) -> (board[row] and mask) == 0L }) {
-                placement.rowMasks.forEach { (row, mask) -> board[row] = board[row] or mask }
+    private fun placeShapeInstances(
+        board: LongArray,
+        remaining: IntArray,
+        placements: List<List<Placement>>,
+        shapeIdx: Int,
+        startPlacementIdx: Int
+    ): Boolean {
+        if (remaining[shapeIdx] == 0) {
+            return solve(board, remaining, placements, shapeIdx + 1)
+        }
+
+        for (i in startPlacementIdx until placements[shapeIdx].size) {
+            val placement = placements[shapeIdx][i]
+            if (!placement.conflictsWith(board)) {
+                placement.place(board)
                 remaining[shapeIdx]--
 
-                if (solve(board, remaining, placements)) return true
+                if (placeShapeInstances(board, remaining, placements, shapeIdx, i + 1)) return true
 
-                placement.rowMasks.forEach { (row, mask) -> board[row] = board[row] xor mask }
+                placement.unplace(board)
                 remaining[shapeIdx]++
             }
         }
+
         return false
     }
 
     fun countRegionsThatFitShapes(): Long {
         val (shapes, regions) = parseInput(readInput())
-        return regions.count { canFit(it, shapes, it.presentCounts) }.toLong()
+        return regions.parallelStream()
+            .filter { canFit(it, shapes, it.presentCounts) }
+            .count()
     }
 }
 
