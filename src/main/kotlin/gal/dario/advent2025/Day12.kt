@@ -126,28 +126,6 @@ class Day12 {
         return shapes to regions
     }
 
-    private fun generatePlacementsForShape(orientations: List<Shape>, region: Region): List<Placement> = buildList {
-        for (orientation in orientations) {
-            for (row in 0..region.height - orientation.height) {
-                for (col in 0..region.width - orientation.width) {
-                    val cells = orientation.cells.map { (cellX, cellY) -> (col + cellX) to (row + cellY) }
-                    val masks = cells.groupBy({ it.second }, { it.first })
-                        .mapValues { (_, xPositions) -> xPositions.fold(0L) { mask, xPos -> mask or (1L shl xPos) } }
-                    add(Placement(masks))
-                }
-            }
-        }
-    }
-
-    private fun canFit(region: Region, shapes: List<List<Shape>>, counts: List<Int>): Boolean {
-        val boardArea = region.width * region.height
-        val neededArea = counts.withIndex().sumOf { (index, count) -> shapes[index].first().cells.size * count }
-        if (neededArea > boardArea) return false
-
-        val placements = shapes.map { generatePlacementsForShape(it, region) }
-        return solve(LongArray(region.height), counts.toIntArray(), placements, 0)
-    }
-
     private fun solve(
         board: LongArray,
         remaining: IntArray,
@@ -189,9 +167,14 @@ class Day12 {
 
     fun countRegionsThatFitShapes(): Long {
         val (shapes, regions) = parseInput(readInput())
-        return regions.parallelStream()
-            .filter { canFit(it, shapes, it.presentCounts) }
-            .count()
+
+        return regions.count { region ->
+            val boardArea = region.width * region.height
+            val neededArea = region.presentCounts.withIndex().sumOf { (index, count) ->
+                shapes[index].first().cells.size * count
+            }
+            neededArea <= boardArea
+        }.toLong()
     }
 }
 
